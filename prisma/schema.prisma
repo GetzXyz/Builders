@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  name            String
+  password        String
+  role            UserRole        @default(USER)
+  isEmailVerified Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  builds          Build[]
+  consent         Consent?
+  preferences     UserPreference?
+}
+
+model UserPreference {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  theme      String   @default("dark")
+  currency   String   @default("PKR")
+  region     String   @default("PK")
+  language   String   @default("en")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Consent {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  privacyAccepted  Boolean  @default(false)
+  termsAccepted    Boolean  @default(false)
+  privacyAcceptedAt DateTime?
+  termsAcceptedAt   DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Build {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  name            String
+  budget          Float
+  currency        String
+  region          String
+  usage           String
+  tier            BuildTier
+  totalPrice      Float
+  components      Json
+  performance     Json?
+  peripherals     Json?
+  status          BuildStatus      @default(DRAFT)
+  isPublic        Boolean          @default(false)
+  shareToken      String?
+  views           Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Component {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  brand       String
+  model       String
+  price       Float
+  currency    String
+  region      String
+  description String?
+  specs       Json
+  compatibility Json
+  benchmark   Json?
+  availability Boolean  @default(true)
+  url         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum BuildTier {
+  ENTRY
+  BUDGET
+  MID_RANGE
+  HIGH_END
+  ENTHUSIAST
+  FLAGSHIP
+}
+
+enum BuildStatus {
+  DRAFT
+  COMPLETED
+  ARCHIVED
+}
