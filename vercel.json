@@ -7,11 +7,7 @@
     }
   ],
   "env": {
-    "DATABASE_URL": "@database_url",
-    "GROQ_API_KEY": "@groq_api_key",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url",
-    "JWT_SECRET": "@jwt_secret",
-    "ENCRYPTION_KEY": "@encryption_key"
+    "DATABASE_URL": "postgresql://user:password@host:5432/database",
+    "GROQ_API_KEY": "your-groq-api-key-here"
   }
 }
