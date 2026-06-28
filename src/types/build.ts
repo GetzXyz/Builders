@@ -2,35 +2,20 @@ export interface BuildRequest {
   budget: number;
   currency: string;
   region: string;
-  usage: UsageType;
-  preferences?: BuildPreferences;
-}
-
-export type UsageType = 
-  | 'gaming'
-  | 'streaming'
-  | 'editing'
-  | 'programming'
-  | 'ai_ml'
-  | 'productivity'
-  | 'mixed';
-
-export interface BuildPreferences {
-  includeMonitor?: boolean;
-  includePeripherals?: boolean;
-  usedComponents?: boolean;
-  overclock?: boolean;
-  colorTheme?: string;
-  formFactor?: 'ATX' | 'mATX' | 'ITX';
+  usage: string;
+  preferences?: {
+    includeMonitor?: boolean;
+    includePeripherals?: boolean;
+  };
 }
 
 export interface BuildResponse {
   id: string;
   name: string;
-  tier: BuildTier;
+  tier: string;
   totalPrice: number;
   currency: string;
-  components: ComponentSelection[];
+  components: Record<string, ComponentSelection>;
   performance: PerformancePrediction;
   peripherals?: PeripheralRecommendation[];
   compatibility: CompatibilityReport;
@@ -39,45 +24,22 @@ export interface BuildResponse {
 }
 
 export interface ComponentSelection {
-  category: ComponentCategory;
   name: string;
   brand: string;
-  model: string;
   price: number;
   currency: string;
   reason: string;
-  compatibility: ComponentCompatibility;
-  specs: Record<string, any>;
-  selected: boolean;
-}
-
-export type ComponentCategory = 
-  | 'cpu'
-  | 'gpu'
-  | 'motherboard'
-  | 'ram'
-  | 'storage'
-  | 'psu'
-  | 'cooler'
-  | 'case'
-  | 'monitor';
-
-export interface ComponentCompatibility {
-  compatible: boolean;
-  issues?: string[];
-  warnings?: string[];
-}
-
-export interface CompatibilityReport {
-  overall: boolean;
-  issues: string[];
-  warnings: string[];
-  suggestions: string[];
+  specs?: Record<string, any>;
 }
 
 export interface PerformancePrediction {
   games: GamePerformance[];
-  synthetic: SyntheticPerformance;
+  synthetic: {
+    singleCore: number;
+    multiCore: number;
+    gpuScore: number;
+    memoryScore: number;
+  };
   summary: string;
 }
 
@@ -90,13 +52,6 @@ export interface GamePerformance {
   confidence: number;
 }
 
-export interface SyntheticPerformance {
-  singleCore: number;
-  multiCore: number;
-  gpuScore: number;
-  memoryScore: number;
-}
-
 export interface PeripheralRecommendation {
   category: 'keyboard' | 'mouse' | 'headphones';
   name: string;
@@ -107,4 +62,9 @@ export interface PeripheralRecommendation {
   reason: string;
 }
 
-export type BuildTier = 'ENTRY' | 'BUDGET' | 'MID_RANGE' | 'HIGH_END' | 'ENTHUSIAST' | 'FLAGSHIP';
+export interface CompatibilityReport {
+  overall: boolean;
+  issues: string[];
+  warnings: string[];
+  suggestions: string[];
+} 

@@ -1,90 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --forge-bg: #04080f;
-    --forge-panel: #0a1220;
-    --forge-card: #0d1526;
-    --forge-border: #1a2f50;
-    --forge-accent: #00f0ff;
-    --forge-accent2: #7b2fff;
-    --forge-text: #c8d8f0;
-    --forge-text2: #7090b0;
-    --forge-gold: #ffb700;
-    --forge-success: #00e676;
-    --forge-danger: #ff3c5a;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-forge-bg text-forge-text font-jakarta antialiased;
-    background-image: 
-      radial-gradient(ellipse at 50% 0%, rgba(0, 240, 255, 0.03) 0%, transparent 70%),
-      radial-gradient(ellipse at 0% 50%, rgba(123, 47, 255, 0.02) 0%, transparent 50%),
-      radial-gradient(ellipse at 100% 50%, rgba(0, 240, 255, 0.02) 0%, transparent 50%);
-    min-height: 100vh;
-  }
-
-  ::selection {
-    @apply bg-forge-accent/30 text-forge-text;
-  }
-
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-forge-panel;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-forge-border rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-forge-accent/50;
-  }
+:root {
+  --forge-bg: #04080f;
+  --forge-panel: #0a1220;
+  --forge-card: #0d1526;
+  --forge-border: #1a2f50;
+  --forge-accent: #00f0ff;
+  --forge-accent2: #7b2fff;
+  --forge-text: #c8d8f0;
+  --forge-text2: #7090b0;
+  --forge-gold: #ffb700;
+  --forge-success: #00e676;
+  --forge-danger: #ff3c5a;
 }
 
-@layer components {
-  .glass {
-    @apply bg-forge-panel/80 backdrop-blur-lg border border-forge-border/50;
-  }
-
-  .glass-hover {
-    @apply hover:bg-forge-card/80 hover:border-forge-accent/30 transition-all duration-300;
-  }
-
-  .cyber-glow {
-    @apply shadow-[0_0_30px_rgba(0,240,255,0.15)];
-  }
-
-  .cyber-glow-hover {
-    @apply hover:shadow-[0_0_50px_rgba(0,240,255,0.25)] transition-shadow duration-300;
-  }
-
-  .text-gradient {
-    @apply bg-gradient-to-r from-forge-accent to-forge-accent2 bg-clip-text text-transparent;
-  }
-
-  .animate-shimmer {
-    @apply bg-gradient-to-r from-forge-card via-forge-accent/10 to-forge-card bg-[length:200%_100%] animate-shimmer;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer utilities {
-  .bg-cyber-grid {
-    background-image: 
-      linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
+body {
+  background: var(--forge-bg);
+  color: var(--forge-text);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-cyber-grid {
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.bg-forge-bg { background: var(--forge-bg); }
+.bg-forge-panel { background: var(--forge-panel); }
+.bg-forge-card { background: var(--forge-card); }
+.border-forge-border { border-color: var(--forge-border); }
+.text-forge-text { color: var(--forge-text); }
+.text-forge-text2 { color: var(--forge-text2); }
+.text-forge-accent { color: var(--forge-accent); }
+.text-forge-accent2 { color: var(--forge-accent2); }
+.text-forge-danger { color: var(--forge-danger); }
+.text-forge-success { color: var(--forge-success); }
+
+.font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+::selection {
+  background: rgba(0, 240, 255, 0.3);
+  color: var(--forge-text);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--forge-panel);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--forge-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--forge-accent);
 }
