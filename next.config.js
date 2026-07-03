@@ -6,9 +6,6 @@ const nextConfig = {
     domains: ['localhost'],
     formats: ['image/avif', 'image/webp'],
   },
-  experimental: {
-    optimizeCss: true,
-  },
   headers: async () => {
     return [
       {
