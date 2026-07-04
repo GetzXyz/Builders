@@ -9,6 +9,7 @@ import {
   useTransform,
   useInView,
   animate,
+  type Variants,
 } from 'framer-motion';
 
 const CHIPS = [
@@ -19,11 +20,11 @@ const CHIPS = [
   { label: 'PSU', x: '72%', y: '82%', delay: 3.3 },
 ];
 
-const container = {
+const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
 };
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 28 },
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
@@ -74,7 +75,6 @@ export default function Hero() {
       onMouseMove={onMove}
       className="relative min-h-screen overflow-hidden bg-forge-bg flex items-center justify-center"
     >
-      {/* Aurora nebulas */}
       <div
         aria-hidden
         className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full blur-[110px] animate-aurora-a"
@@ -86,18 +86,13 @@ export default function Hero() {
         style={{ background: 'radial-gradient(circle, rgba(123,47,255,.18), transparent 65%)' }}
       />
 
-      {/* Moving grid + scanline */}
       <div aria-hidden className="absolute inset-0 bg-cyber-grid-bright animate-grid-pan" />
       <div
         aria-hidden
         className="absolute left-0 w-full h-px animate-scanline"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent, rgba(0,240,255,.5), transparent)',
-        }}
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,240,255,.5), transparent)' }}
       />
 
-      {/* Orbital rings (wrapper centers, inner spins) */}
       <div aria-hidden className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[540px] h-[540px] hidden md:block">
         <div
           className="w-full h-full rounded-full border border-forge-accent/10 animate-spin-slow"
@@ -111,7 +106,6 @@ export default function Hero() {
         />
       </div>
 
-      {/* Pulsing core (parallax wrapper + pulsing inner) */}
       <motion.div
         aria-hidden
         style={{ x: coreX, y: coreY }}
@@ -126,7 +120,6 @@ export default function Hero() {
         />
       </motion.div>
 
-      {/* Floating chips with mouse parallax */}
       <motion.div aria-hidden style={{ x: chipX, y: chipY }} className="absolute inset-0 hidden md:block">
         {CHIPS.map((chip) => (
           <motion.div
@@ -143,7 +136,6 @@ export default function Hero() {
         ))}
       </motion.div>
 
-      {/* Content */}
       <motion.div
         className="relative z-10 max-w-4xl mx-auto px-6 text-center"
         variants={container}
@@ -181,16 +173,16 @@ export default function Hero() {
               href="/builder"
               className="glow-cta inline-block font-orbitron tracking-widest text-sm px-10 py-4 rounded-lg bg-gradient-to-r from-forge-accent to-forge-accent2 text-forge-bg font-bold"
             >
-              START BUILDING →
+              START BUILDING &rarr;
             </Link>
           </motion.div>
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-            
+            <Link
               href="#features"
               className="inline-block font-orbitron tracking-widest text-sm px-10 py-4 rounded-lg border border-forge-border text-forge-text hover:border-forge-accent/60 hover:text-forge-accent transition-colors"
             >
               HOW IT WORKS
-            </a>
+            </Link>
           </motion.div>
         </motion.div>
 
@@ -201,14 +193,13 @@ export default function Hero() {
         </motion.div>
       </motion.div>
 
-      {/* Scroll cue */}
       <motion.div
         aria-hidden
         className="absolute bottom-8 left-1/2 -translate-x-1/2 text-forge-accent/70"
         animate={{ y: [0, 10, 0] }}
         transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
       >
-        ▾
+        &#9662;
       </motion.div>
 
       <div aria-hidden className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-forge-bg to-transparent" />
