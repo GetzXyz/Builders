@@ -1,5 +1,9 @@
-import { redirect } from 'next/navigation';
+import Hero from '@/components/landing/Hero';
 
 export default function Home() {
-  redirect('/builder');
+  return (
+    <main>
+      <Hero />
+    </main>
+  );
 }

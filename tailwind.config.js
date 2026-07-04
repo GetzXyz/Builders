@@ -1,10 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
@@ -23,15 +19,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        orbitron: ['Orbitron', 'sans-serif'],
-        jetbrains: ['JetBrains Mono', 'monospace'],
-        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
-      },
-      backgroundImage: {
-        'cyber-grid': 'linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px)',
-      },
-      backgroundSize: {
-        'cyber-grid': '40px 40px',
+        sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
+        orbitron: ['var(--font-orbitron)', 'sans-serif'],
       },
     },
   },
