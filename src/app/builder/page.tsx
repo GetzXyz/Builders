@@ -1,308 +1,296 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import toast from 'react-hot-toast';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import type { BuildV2 } from '@/types/build';
 
-// Zod schema
-const schema = z.object({
-  budget: z.number().min(1000, 'Minimum budget is 1,000'),
-  currency: z.string().min(1, 'Please select a currency'),
-  region: z.string().min(1, 'Please select a region'),
-  usage: z.string().min(1, 'Please select a use case'),
-});
+const CURRENCIES = [
+  { code: 'PKR', symbol: 'Rs', region: 'Pakistan' },
+  { code: 'USD', symbol: '$', region: 'United States' },
+  { code: 'EUR', symbol: 'EUR', region: 'Germany' },
+  { code: 'GBP', symbol: 'GBP', region: 'United Kingdom' },
+  { code: 'CAD', symbol: 'CA$', region: 'Canada' },
+  { code: 'AUD', symbol: 'A$', region: 'Australia' },
+  { code: 'SAR', symbol: 'SR', region: 'Saudi Arabia' },
+  { code: 'AED', symbol: 'AED', region: 'UAE' },
+  { code: 'INR', symbol: 'INR', region: 'India' },
+];
+const USAGES = ['Gaming', 'Streaming', 'Video Editing', 'AI Development', 'Productivity'];
+const CATEGORY_LABELS: Record<string, string> = {
+  cpu: 'Processor', gpu: 'Graphics Card', motherboard: 'Motherboard', ram: 'Memory',
+  storage: 'Storage', psu: 'Power Supply', case: 'Case', cooler: 'Cooling',
+};
 
-type FormData = z.infer<typeof schema>;
-
-// Loading Spinner Component
-function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const sizes = { sm: 'w-4 h-4', md: 'w-8 h-8', lg: 'w-12 h-12' };
-  return <div className={`${sizes[size]} border-2 border-forge-border border-t-forge-accent rounded-full animate-spin`} />;
-}
-
-// Budget Input Component
-function BudgetInput({ register, errors, budget, currency, setValue }: any) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-forge-text2 mb-2">Enter Your Budget</label>
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <input
-            type="number"
-            {...register('budget', { valueAsNumber: true })}
-            className="w-full px-4 py-3 bg-forge-card border border-forge-border rounded-lg text-forge-text focus:border-forge-accent focus:ring-1 focus:ring-forge-accent outline-none transition-colors"
-            placeholder="e.g., 150000"
-            min="1000"
-            step="1000"
-          />
-          {errors.budget && <p className="text-sm text-forge-danger mt-1">{errors.budget.message as string}</p>}
-        </div>
-        <div className="text-forge-accent font-orbitron text-xl font-bold">{currency}</div>
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {[50000, 100000, 200000, 500000].map((amount) => (
-          <button
-            key={amount}
-            type="button"
-            onClick={() => setValue('budget', amount)}
-            className="text-xs px-3 py-1 bg-forge-card border border-forge-border rounded text-forge-text2 hover:border-forge-accent transition-colors"
-          >
-            Rs {amount.toLocaleString()}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Usage Selector Component
-function UsageSelector({ register, errors, usage }: any) {
-  const options = [
-    { value: 'gaming', label: '🎮 Gaming' },
-    { value: 'streaming', label: '📡 Streaming' },
-    { value: 'editing', label: '🎬 Video Editing' },
-    { value: 'programming', label: '💻 Programming' },
-    { value: 'ai_ml', label: '🧠 AI/ML' },
-    { value: 'productivity', label: '📊 Productivity' },
-    { value: 'mixed', label: '⚖️ Mixed' },
-  ];
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-forge-text2 mb-2">Primary Use Case</label>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {options.map((option) => (
-          <label
-            key={option.value}
-            className={`cursor-pointer p-3 rounded-lg border transition-all ${
-              usage === option.value
-                ? 'border-forge-accent bg-forge-accent/10 shadow-[0_0_20px_rgba(0,240,255,0.1)]'
-                : 'border-forge-border bg-forge-card hover:border-forge-accent/50'
-            }`}
-          >
-            <input type="radio" {...register('usage')} value={option.value} className="hidden" />
-            <div className="text-center text-sm">{option.label}</div>
-          </label>
-        ))}
-      </div>
-      {errors.usage && <p className="text-sm text-forge-danger mt-1">{errors.usage.message as string}</p>}
-    </div>
-  );
-}
-
-// Region Selector Component
-function RegionSelector({ register, errors, region }: any) {
-  const regions = [
-    { code: 'PK', name: '🇵🇰 Pakistan' },
-    { code: 'US', name: '🇺🇸 United States' },
-    { code: 'GB', name: '🇬🇧 United Kingdom' },
-    { code: 'CA', name: '🇨🇦 Canada' },
-    { code: 'AU', name: '🇦🇺 Australia' },
-    { code: 'AE', name: '🇦🇪 UAE' },
-    { code: 'SA', name: '🇸🇦 Saudi Arabia' },
-  ];
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-forge-text2 mb-2">Region</label>
-      <select
-        {...register('region')}
-        className="w-full px-4 py-3 bg-forge-card border border-forge-border rounded-lg text-forge-text focus:border-forge-accent focus:ring-1 focus:ring-forge-accent outline-none transition-colors"
-      >
-        {regions.map((r) => (
-          <option key={r.code} value={r.code}>{r.name}</option>
-        ))}
-      </select>
-      {errors.region && <p className="text-sm text-forge-danger mt-1">{errors.region.message as string}</p>}
-    </div>
-  );
-}
-
-// Build Results Component
-function BuildResults({ build, onReset }: any) {
-  if (!build) return null;
-
-  const categories: Record<string, string> = {
-    cpu: 'CPU',
-    gpu: 'GPU',
-    motherboard: 'Motherboard',
-    ram: 'RAM',
-    storage: 'Storage',
-    psu: 'PSU',
-    cooler: 'Cooler',
-    case: 'Case',
-    monitor: 'Monitor',
-  };
-
-  return (
-    <div className="space-y-6">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-forge-panel/80 backdrop-blur-lg border border-forge-border rounded-2xl p-6"
-      >
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-orbitron text-forge-accent">{build.name || 'Your Build'}</h2>
-            <div className="flex items-center gap-4 mt-2">
-              <span className="px-3 py-1 bg-forge-accent/20 text-forge-accent rounded-full text-sm font-medium">
-                {build.tier || 'Custom'}
-              </span>
-              <span className="text-forge-text2">Total: {build.totalPrice?.toLocaleString() || 0} {build.currency || 'PKR'}</span>
-            </div>
-          </div>
-          <button 
-            onClick={onReset} 
-            className="px-4 py-2 bg-forge-card border border-forge-border rounded-lg text-forge-text2 hover:text-forge-text hover:border-forge-accent transition-colors"
-          >
-            New Build
-          </button>
-        </div>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {build.components && Object.entries(build.components).map(([key, comp]: [string, any]) => (
-          <motion.div 
-            key={key}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-forge-card border border-forge-border rounded-xl p-4 hover:border-forge-accent/50 transition-colors"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-forge-text2 font-medium">{categories[key as keyof typeof categories] || key}</p>
-                <p className="text-sm font-semibold text-forge-text">{comp.name || 'Unknown'}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-forge-accent">{comp.price?.toLocaleString() || 0} {comp.currency || 'PKR'}</p>
-                <span className="text-xs text-forge-text2">{comp.brand || 'Generic'}</span>
-              </div>
-            </div>
-            <p className="text-sm text-forge-text2 mt-2">{comp.reason || 'Recommended component'}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {build.performance?.games && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-forge-panel/80 backdrop-blur-lg border border-forge-border rounded-2xl p-6"
-        >
-          <h3 className="text-lg font-orbitron text-forge-accent mb-4">🎮 Expected Gaming Performance</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-forge-border">
-                  <th className="text-left py-2 text-sm text-forge-text2 font-medium">Game</th>
-                  <th className="text-center py-2 text-sm text-forge-text2 font-medium">Resolution</th>
-                  <th className="text-center py-2 text-sm text-forge-text2 font-medium">Preset</th>
-                  <th className="text-center py-2 text-sm text-forge-text2 font-medium">Avg FPS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {build.performance.games.map((game: any, index: number) => (
-                  <tr key={game.name} className="border-b border-forge-border/50">
-                    <td className="py-3 text-sm text-forge-text font-medium">{game.name}</td>
-                    <td className="py-3 text-center text-sm text-forge-text2">{game.resolution}</td>
-                    <td className="py-3 text-center text-sm text-forge-text2">{game.preset}</td>
-                    <td className="py-3 text-center text-sm font-bold text-forge-accent">{game.avgFPS}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-// Main Page Component
 export default function BuilderPage() {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [build, setBuild] = useState<any>(null);
+  const router = useRouter();
+  const [currency, setCurrency] = useState('PKR');
+  const [region, setRegion] = useState('Pakistan');
+  const [budget, setBudget] = useState('');
+  const [usage, setUsage] = useState('Gaming');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [build, setBuild] = useState<BuildV2 | null>(null);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { currency: 'PKR', region: 'PK', usage: 'gaming' },
-  });
+  const sym = CURRENCIES.find((c) => c.code === currency)?.symbol ?? '';
 
-  const budget = watch('budget');
-  const currency = watch('currency');
-  const usage = watch('usage');
-  const region = watch('region');
+  const total = useMemo(() => {
+    if (!build) return 0;
+    return build.slots.reduce((sum, s) => sum + (s.options[s.selectedIndex]?.price ?? 0), 0);
+  }, [build]);
 
-  const onSubmit = async (data: FormData) => {
+  function onCurrencyChange(code: string) {
+    setCurrency(code);
+    const c = CURRENCIES.find((x) => x.code === code);
+    if (c) setRegion(c.region);
+  }
+
+  async function generate() {
+    setLoading(true);
+    setError(null);
+    setBuild(null);
     try {
-      setIsGenerating(true);
-      setBuild(null);
-
-      const response = await fetch('/api/groq', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'recommend',
-          budget: data.budget,
-          currency: data.currency,
-          region: data.region,
-          usage: data.usage,
-        }),
+        body: JSON.stringify({ action: 'recommend_v2', budget: Number(budget), currency, region, usage }),
       });
-
-      if (!response.ok) throw new Error('Failed to generate build');
-      const result = await response.json();
-      if (result.error) throw new Error(result.error);
-      
-      setBuild(result.build);
-      toast.success('Build generated successfully!');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to generate build');
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Something went wrong. Please try again.');
+      } else {
+        setBuild(data.build);
+      }
+    } catch {
+      setError('Network error. Please check your connection and try again.');
     } finally {
-      setIsGenerating(false);
+      setLoading(false);
     }
-  };
+  }
+
+  function selectOption(slotIdx: number, optIdx: number) {
+    if (!build) return;
+    const slots = build.slots.map((s, i) => (i === slotIdx ? { ...s, selectedIndex: optIdx } : s));
+    setBuild({ ...build, slots });
+  }
+
+  function confirmBuild() {
+    if (!build) return;
+    const parts = build.slots.map((s) => {
+      const o = s.options[s.selectedIndex];
+      return { category: s.category, name: `${o.brand} ${o.name}` };
+    });
+    sessionStorage.setItem(
+      'forge-build',
+      JSON.stringify({ name: build.name, tier: build.tier, currency, total, parts, slots: build.slots })
+    );
+    router.push('/performance');
+  }
 
   return (
-    <div className="min-h-screen bg-forge-bg text-forge-text">
-      <div className="fixed inset-0 bg-cyber-grid bg-cyber-grid opacity-20 pointer-events-none" />
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          className="text-center mb-8"
-        >
-          <h1 className="text-3xl md:text-4xl font-orbitron font-bold bg-gradient-to-r from-forge-accent to-forge-accent2 bg-clip-text text-transparent">
-            PC BUILD GENERATOR
+    <main className="bg-lux-silver min-h-screen">
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-24">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-lux-ink mb-3">
+            Configure Your <span className="text-chrome">Build</span>
           </h1>
-          <p className="text-forge-text2 mt-2">Let AI find the perfect components for your needs</p>
+          <p className="text-lux-gray mb-10">
+            Pick a currency, set your budget, and the AI proposes three vetted options for every component.
+          </p>
         </motion.div>
 
-        {!build ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-            <div className="bg-forge-panel/80 backdrop-blur-lg border border-forge-border rounded-2xl p-6 md:p-8">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <BudgetInput register={register} errors={errors} budget={budget} currency={currency} setValue={setValue} />
-                <UsageSelector register={register} errors={errors} usage={usage} />
-                <RegionSelector register={register} errors={errors} region={region} />
-
-                <button
-                  type="submit"
-                  disabled={isGenerating}
-                  className="w-full py-4 bg-gradient-to-r from-forge-accent to-forge-accent2 text-forge-bg font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isGenerating ? <><LoadingSpinner size="sm" /> Generating...</> : 'Generate Build 🚀'}
-                </button>
-              </form>
+        {/* Controls */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="card-lux !rounded-2xl p-6 md:p-8 mb-10"
+        >
+          <div className="grid md:grid-cols-4 gap-5">
+            <div>
+              <label className="block text-xs font-semibold tracking-wide text-lux-gray mb-2">CURRENCY</label>
+              <select
+                value={currency}
+                onChange={(e) => onCurrencyChange(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-lux-border bg-white text-lux-ink focus:outline-none focus:border-lux-blue focus:shadow-[0_0_0_4px_rgba(0,102,255,0.08)] transition-shadow"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.code} - {c.region}</option>
+                ))}
+              </select>
             </div>
-          </motion.div>
-        ) : (
-          <BuildResults build={build} onReset={() => setBuild(null)} />
+
+            <div>
+              <label className="block text-xs font-semibold tracking-wide text-lux-gray mb-2">BUDGET ({currency})</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lux-gray text-sm">{sym}</span>
+                <input
+                  type="number"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  placeholder={currency === 'PKR' ? '150000' : '1500'}
+                  className="w-full h-12 pl-12 pr-4 rounded-xl border border-lux-border bg-white text-lux-ink focus:outline-none focus:border-lux-blue focus:shadow-[0_0_0_4px_rgba(0,102,255,0.08)] transition-shadow"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold tracking-wide text-lux-gray mb-2">PRIMARY USE</label>
+              <select
+                value={usage}
+                onChange={(e) => setUsage(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl border border-lux-border bg-white text-lux-ink focus:outline-none focus:border-lux-blue focus:shadow-[0_0_0_4px_rgba(0,102,255,0.08)] transition-shadow"
+              >
+                {USAGES.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={generate}
+                disabled={loading || !budget}
+                className="btn-lux btn-primary w-full h-12 !py-0 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Forging...' : 'Generate Build'}
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-5 p-4 rounded-xl bg-[#FFF7ED] border border-[#FDBA74] text-sm text-[#9A3412] leading-relaxed"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* AI thinking skeleton */}
+        {loading && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-3 h-3 rounded-full bg-lux-blue animate-ping" />
+              <span className="text-sm font-medium text-lux-gray">AI is weighing hundreds of part combinations...</span>
+            </div>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="card-lux !rounded-2xl p-6 animate-pulse">
+                <div className="h-4 w-40 bg-lux-section rounded mb-5" />
+                <div className="grid md:grid-cols-3 gap-4">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="h-36 bg-lux-silver rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Result */}
+        {build && !loading && (
+          <div className="space-y-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-lux-ink">{build.name}</h2>
+                <p className="text-sm text-lux-gray">{build.summary}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-lux-gray mb-1">SELECTED TOTAL</div>
+                <div className="text-2xl font-bold text-lux-ink">{sym} {total.toLocaleString()}</div>
+              </div>
+            </motion.div>
+
+            {build.slots.map((slot, si) => (
+              <motion.div
+                key={slot.category}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5 }}
+                className="card-lux !rounded-2xl p-6"
+              >
+                <h3 className="text-sm font-semibold tracking-wide text-lux-gray mb-4 uppercase">
+                  {CATEGORY_LABELS[slot.category] ?? slot.category}
+                </h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {slot.options.map((opt, oi) => {
+                    const active = oi === slot.selectedIndex;
+                    return (
+                      <button
+                        key={oi}
+                        onClick={() => selectOption(si, oi)}
+                        className={`text-left p-5 rounded-xl border transition-all duration-300 ${
+                          active
+                            ? 'border-lux-blue bg-[#F5F9FF] shadow-[0_0_0_4px_rgba(0,102,255,0.08),0_8px_24px_rgba(0,102,255,0.10)]'
+                            : 'border-lux-border bg-white hover:border-lux-chrome hover:-translate-y-1 hover:shadow-lux'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full ${
+                            opt.condition === 'new'
+                              ? 'bg-[#EAF2FF] text-lux-blue'
+                              : 'bg-[#FFF4E5] text-[#B45309]'
+                          }`}>
+                            {opt.condition.toUpperCase()}
+                            {opt.condition === 'used' && opt.riskRating ? ` - ${opt.riskRating.toUpperCase()} RISK` : ''}
+                          </span>
+                          {active && <span className="text-lux-blue text-xs font-bold">SELECTED</span>}
+                        </div>
+                        <div className="font-semibold text-lux-ink text-sm mb-1">{opt.brand} {opt.name}</div>
+                        <div className="text-lg font-bold text-lux-ink mb-2">{sym} {opt.price.toLocaleString()}</div>
+                        <p className="text-xs leading-relaxed text-lux-gray">{opt.reason}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Compatibility */}
+            {(build.compatibility.warnings.length > 0 || build.compatibility.issues.length > 0) && (
+              <div className="card-lux !rounded-2xl p-6">
+                <h3 className="text-sm font-semibold tracking-wide text-lux-gray mb-3 uppercase">Compatibility Notes</h3>
+                {build.compatibility.issues.map((x, i) => (
+                  <p key={`i${i}`} className="text-sm text-[#B42318] mb-1.5">! {x}</p>
+                ))}
+                {build.compatibility.warnings.map((x, i) => (
+                  <p key={`w${i}`} className="text-sm text-[#B45309] mb-1.5">- {x}</p>
+                ))}
+              </div>
+            )}
+
+            {/* Confirm */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="sticky bottom-6 card-lux !rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 !shadow-lux-hover"
+            >
+              <div>
+                <div className="text-xs text-lux-gray">FINAL TOTAL - {build.slots.length} COMPONENTS</div>
+                <div className="text-2xl font-bold text-lux-ink">{sym} {total.toLocaleString()}</div>
+              </div>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <button onClick={confirmBuild} className="btn-lux btn-primary">
+                  Confirm Build - See Performance &rarr;
+                </button>
+              </motion.div>
+            </motion.div>
+          </div>
         )}
       </div>
-    </div>
+
+      <Footer />
+    </main>
   );
 }
