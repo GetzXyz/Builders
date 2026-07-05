@@ -9,6 +9,63 @@ export interface BuildRequest {
   };
 }
 
+/* ===== Engine v2 ===== */
+
+export type ComponentCategory =
+  | 'cpu' | 'gpu' | 'motherboard' | 'ram'
+  | 'storage' | 'psu' | 'case' | 'cooler';
+
+export interface ComponentOption {
+  name: string;
+  brand: string;
+  condition: 'new' | 'used';
+  price: number;
+  currency: string;
+  reason: string;
+  wattage: number;
+  riskRating?: 'low' | 'medium' | 'high';
+}
+
+export interface ComponentSlot {
+  category: ComponentCategory;
+  options: ComponentOption[]; // exactly 3
+  selectedIndex: number;
+}
+
+export interface BuildV2 {
+  id: string;
+  name: string;
+  tier: string;
+  currency: string;
+  slots: ComponentSlot[];
+  totalPrice: number;
+  compatibility: CompatibilityReport;
+  summary: string;
+}
+
+export interface GamePerf {
+  name: string;
+  resolution: string;
+  preset: string;
+  avgFPS: number;
+  low1: number;
+}
+
+export interface SoftwarePerf {
+  name: string;
+  score: number; // 0-100
+  tier: 'Entry' | 'Capable' | 'Professional' | 'Workstation';
+  note: string;
+}
+
+export interface PerformanceReport {
+  games: GamePerf[];
+  software: SoftwarePerf[];
+  summary: string;
+}
+
+/* ===== Legacy v1 (used by current builder page until R3) ===== */
+
 export interface BuildResponse {
   id: string;
   name: string;
@@ -67,4 +124,4 @@ export interface CompatibilityReport {
   issues: string[];
   warnings: string[];
   suggestions: string[];
-} 
+}
