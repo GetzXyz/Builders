@@ -1,5 +1,6 @@
 import Navbar from '@/components/layout/Navbar';
 import Hero from '@/components/landing/Hero';
+import Stats from '@/components/landing/Stats';
 import Features from '@/components/landing/Features';
 import Footer from '@/components/layout/Footer';
 
@@ -8,6 +9,7 @@ export default function Home() {
     <main>
       <Navbar />
       <Hero />
+      <Stats />
       <Features />
       <Footer />
     </main>
