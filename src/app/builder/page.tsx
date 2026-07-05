@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import BudgetForm from '@/components/BudgetForm';
+import ComponentSelector from '@/components/ComponentSelector';
+import VideoComponent from '@/components/VideoComponent';
 import type { BuildV2 } from '@/types/build';
 
 const CURRENCIES = [
@@ -175,6 +178,22 @@ export default function BuilderPage() {
             )}
           </AnimatePresence>
         </motion.div>
+
+        {/* New Components Section */}
+        <div className="grid md:grid-cols-3 gap-6 mb-10">
+          <div className="card-lux !rounded-2xl p-6">
+            <h3 className="text-sm font-bold tracking-wide text-lux-gray mb-4 uppercase">Budget Form</h3>
+            <BudgetForm />
+          </div>
+          <div className="card-lux !rounded-2xl p-6">
+            <h3 className="text-sm font-bold tracking-wide text-lux-gray mb-4 uppercase">Component Selector</h3>
+            <ComponentSelector />
+          </div>
+          <div className="card-lux !rounded-2xl p-6">
+            <h3 className="text-sm font-bold tracking-wide text-lux-gray mb-4 uppercase">Video Preview</h3>
+            <VideoComponent />
+          </div>
+        </div>
 
         {/* AI thinking skeleton */}
         {loading && (
